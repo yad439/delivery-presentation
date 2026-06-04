@@ -1,0 +1,193 @@
+section
+	h2 Hexagonal architecture
+	.left(style="font-size: 0.9em;")
+		ul
+			li Hexagonal architecture pattern, proposed by Dr. Alistair Cockburn in 2005 [1].
+			li.fragment Entities (agents) represent core business logic, isolated from external systems.
+			li.fragment Ports define interfaces for external communication
+			li.fragment Adapters implement ports, translating external data for core logic
+		aside.footnotes(style="font-size: 0.8em;").
+			[1] <a href="https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)">https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)</a>
+	img(src="hexagonal.png")
+section
+	h2 Task constraint
+	pre
+		code(language="kotlin" data-line-numbers="*|2|3|4|").
+			interface TaskConstraint {
+				fun earliestFeasibleDate(task: TaskId, fromDate: TimeIndex, cutOffDate: TimeIndex): TimeIndex
+				fun assignTask(task: TaskId, date: TimeIndex)
+				fun removeTask(task: TaskId, date: TimeIndex)
+			}
+section
+	h2 Site agent
+	pre
+		code(language="kotlin" data-line-numbers="*|2-16|2|4,7,8|9|18-29|22-25|23|26|31-38|35|").
+			class SiteLns{
+				fun run(tasks, firstDate, lastDate, constraints:List&lt;TaskConstraint&gt;, isFeasible: Assignment->Bool){
+					val assignment=[]
+					repair(assignment, tasks, constraints, firstDate, lastDate)
+					val currentAssignment = assignment
+					repeat(20) {
+						destroy(currentAssignment, constraints)
+						repair(currentAssignment, unassigned, constraints, firstDate, lastDate)
+						if(currentAssignment.size() > assignedSites.size() && isFeasible(currentAssignment)) {
+							assignment=currentAssignment
+						} else {
+							currentAssignment=assignment
+						}
+					}
+					return assignment
+				}
+
+				fun repair(assignedSites, assignmentTimes, unassigned, constraints: List&lt;TaskConstraint>, firstDate, lastDate) {
+					unassigned.shuffle()
+					unassigned.forEach { task ->
+						var currentDate = firstDate
+						for (constraint in constraints) {
+							currentDate = constraint.earliestFeasibleDate(task, currentDate, lastDate)
+							if (currentDate &ge; lastDate)return@forEach
+						}
+						constraints.forEach { it.assignTask(task, currentDate) }
+						assignment.add(task to currentDate)
+					}
+				}
+
+				fun destroy(assignment, constraints: List&lt;TaskConstraint&gt;) {
+					repeat(5) {
+						val index=random.nextInt(assignedSites.size())
+						val	(task,time)=assignment.removeAtIndex(index)
+						constraints.forEach {it.removeTask(task, time) }
+					}
+				}
+			}
+section
+	h2 Site-material adaptor
+	pre
+		code(language="kotlin" data-line-numbers="*|1|2-11|6|5-9|13-18|15-17|16|20-24|23|").
+			class SiteMaterialAdaptor(val materialAgent:MaterialAgent): TaskConstraint {
+				override fun earliestFeasibleDate(task, fromDate, cutOffDate): TimeIndex {
+					val materials = taskMaterials[task]
+					var currentDate = fromDate
+					for ((material,amount) in materials) {
+						while (currentDate < cutOffDate && materialAgent.getAvailableNum(material,currentDate) < amount)
+							currentDate++
+						if (currentDate==cutOffDate)break
+					}
+					return currentDate
+				}
+
+				override fun assignTask(task, date) {
+					val materials=taskMaterials[task]
+					materials.forEach {(material,amount) ->
+						materialAgent.consume(material,date, amount)
+					}
+				}
+
+				override fun removeTask(task, date) {
+					val materials=taskMaterials[task]
+					materials.forEach {(material,amount) ->
+						materialAgent.rollback(material,date, amount)
+					}
+				}
+			}
+section
+	h2 Site-contractor adaptor
+	pre
+		code(language="kotlin" data-line-numbers="*|1|2-12|6|17,24|").
+			class SiteContractorAdaptor(val contractorAgent: ContractorAgent) : TaskConstraint {
+				override fun earliestFeasibleDate(task, fromDate, cutOffDate): TimeIndex {
+					val requirements = taskRequirements[task]
+					var currentDate = fromDate
+					for ((requirement, contractor) in requirements) {
+						while (currentDate < cutOffDate && !contractorAgent.isAvailable(contractor, currentDate, currentDate+length(task))) {
+							currentDate++
+						}
+						if (currentDate == cutOffDate) break
+					}
+					return currentDate
+				}
+
+				override fun assignTask(task, date) {
+					val contractors = taskRequirements[task]
+					contractors.forEach { (requirement, contractor) ->
+						contractorAgent.assignContractor(contractor, date, date+length(task))
+					}
+				}
+
+				override fun removeTask(task, date) {
+					val contractors = taskRequirements[task]
+					contractors.forEach { (requirement, contractor) ->
+						contractorAgent.unassignContractor(contractor, date, date+length(task))
+					}
+				}
+			}
+section
+	h2 Site — master plan adaptor
+	pre
+		code(language="kotlin" data-line-numbers="*|1,5,13,18|").
+			class SiteMasterPlanAdaptor(val planAgent: MasterPlanAgent) : TaskConstraint {
+				override fun earliestFeasibleDate(task, fromDate, cutOffDate): TimeIndex {
+					val type = taskTypes[task]
+					var currentDate = fromDate
+					while(planAgent.getUb(type,currentDate+length(task)) >= planAgent.taskCount(type,currentDate+length(task))
+							&& currentDate < cutOffDate)
+						currentDate++
+					return currentDate
+				}
+
+				override fun assignTask(task, date) {
+					val type = taskTypes[task]
+					planAgent.addTask(type,date+length(task))
+				}
+
+				override fun removeTask(task, date) {
+					val type = taskTypes[task]
+					planAgent.removeTask(type,date+length(task))
+				}
+			}
+section
+	h2 Cluster agent
+	pre
+		code(language="kotlin" data-line-numbers="|1,2|5,6|14-26|19|20|21|28-35|32|").
+			class ClusterAgent(siteAdaptor: ClusterSiteAdaptor, feasibilityChecker, appliers) {
+				fun run(initialState, clusters, constraints:List&lt;ClusterConstraint&gt;){
+					repeat(iterationCount) {
+						val currentState = state
+						destroy(state)
+						repair(state, unassigned(state))
+						if(currentAssignment.size() > assignedSites.size()) {
+							state=currentState
+						}
+					}
+					return assignment
+				}
+
+				fun repair(state, unassigned) {
+					unassigned.shuffle()
+					months.shuffle()
+					unassigned.forEach { cluster ->
+						months.forEach{ month->
+							if(isFeasible(plan,cluster,month,constraints)){
+								siteSolution=siteAdaptor.assign(cluster,month)
+								appliers.forEach{it.addCluster(cluster, month, siteSolution)}
+								break
+							}
+						}
+					}
+				}
+
+				fun destroy(state) {
+					repeat(5) {
+						val index=random.nextInt(assignedSites.size())
+						val cluster=plan.removeCluster(index)
+						appliers.forEach {it.removeCluster(cluster, month) }
+					}
+				}
+			}
+section
+	h2 Cluster-site adaptor
+	pre
+		code(language="kotlin" data-line-numbers="|2|").
+			class ClusterSiteAdaptor(siteAgent:SiteLns){
+				fun assign(cluster,month) = siteAgent.run(clusterSites(cluster),siteAgent,firstDate(month),lastDate(month))
+			}

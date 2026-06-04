@@ -1,0 +1,73 @@
+:root {
+  --r-main-font-size: 24px;
+  --r-heading2-size: 2em;
+  --r-heading-text-transform: none;
+  /* --r-link-color: rgb(200, 0, 0); */
+}
+
+/*.reveal-viewport {
+  margin-left: 50px;
+  margin-right: 50px;
+  margin-top: 40px;
+}*/
+.reveal p {
+  text-align: left;
+}
+
+.container {
+  display: flex;
+}
+
+.col {
+  flex: 1;
+}
+
+.col-div {
+  flex: 1;
+  border-left: 1px solid;
+  padding-left: 1em;
+}
+
+.left {
+  margin: 10px 0 15px 20px;
+  text-align: left;
+  float: left;
+  width: 48%;
+}
+
+.right {
+  margin: 10px 0 15px 0;
+  float: right;
+  text-align: left;
+  width: 48%;
+}
+
+.left3 {
+  margin: 10px 0 15px 20px;
+  text-align: left;
+  float: left;
+  width: 30%;
+}
+
+.reveal h2 {
+  vertical-align: top;
+}
+
+.reveal h6 {
+  font-size: 1em
+}
+
+/*.ps-root {
+  font-size: 0.5em !important
+}*/
+
+.larger {
+  font-size: 1.2em;
+}
+
+.centered {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}

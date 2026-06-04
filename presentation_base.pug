@@ -1,0 +1,148 @@
+mixin puml()
+  pre
+    code.language-plantuml
+      block
+
+mixin markdown()
+  section(data-markdown="")
+    textarea(data-template)
+      block
+
+- var reveal = 'node_modules/reveal.js/dist'
+
+doctype html
+html(lang="en")
+  head
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no")
+    block title
+      title Default Presentation Title
+    link(rel="stylesheet" href=`${reveal}/reset.css`)
+    link(rel="stylesheet" href=`${reveal}/reveal.css`)
+    link(rel="stylesheet" href=`${reveal}/theme/black.css`)
+    link(rel="stylesheet" href="custom.css")
+    link(rel="stylesheet" href="node_modules/highlight.js/styles/stackoverflow-dark.min.css")
+    block additional_styles
+  body
+    .reveal
+      .slides
+        block slides
+
+    script(src=`${reveal}/reveal.js`)
+    script(src=`${reveal}/plugin/notes.js`)
+    script(src=`${reveal}/plugin/markdown.js`)
+    script(src=`${reveal}/plugin/highlight.js`)
+    script(src=`${reveal}/plugin/math.js`)
+    script(src=`${reveal}/plugin/zoom.js`)
+    block additional_scripts
+      //- script(src="https://unpkg.com/tldreveal/dist/bundle/index.js")
+      script(src="https://unpkg.com/tldreveal/dist/bundle/index.js")
+      script(src="https://unpkg.com/rough-notation/lib/rough-notation.iife.js")
+    //-   script(src="https://cdn.jsdelivr.net/npm/reveal.js-mermaid-plugin@11.4.1/plugin/mermaid/mermaid.js")
+
+    script.
+      // .babel(presets=['minify'])
+      Reveal.initialize({
+        width: 1280,
+        height: 720,
+        hash: true,
+        center: true,
+        slideNumber: true,
+        pdfSeparateFragments: true,
+        // barColor: 'rgb(100, 180, 255)'
+        scrollActivationWidth: undefined,
+        plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX, RevealZoom, Tldreveal.Tldreveal()],
+        // RevealMermaid
+        // dependencies: [{src: 'https://cdn.jsdelivr.net/npm/reveal-plantuml',}],
+        // plantuml: {serverPath: 'https://plantuml.com/plantuml/svg/'}
+      });
+
+      function addAnnotation(element, type, color){
+        // Capture existing SVG nodes so we can reliably detect the one RoughNotation inserts
+        const existingSvgs = new Set(Array.from(document.querySelectorAll('svg')));
+
+        const annotation = RoughNotation.annotate(element, {type: type, color: color});
+        // Show first; RoughNotation typically inserts the SVG during show()
+        annotation.show();
+
+        function parseScale(transform){
+          if(!transform || transform === 'none') return 1;
+          let m;
+          if(transform.indexOf('matrix') === 0){
+            m = /matrix\(([^)]+)\)/.exec(transform);
+            if(m){
+              const parts = m[1].split(',');
+              const a = parseFloat(parts[0]);
+              return (isFinite(a) && a !== 0) ? Math.abs(a) : 1;
+            }
+          }
+          m = /scale\(([^)]+)\)/.exec(transform);
+          if(m) return parseFloat(m[1]) || 1;
+          return 1;
+        }
+
+        const scaler = document.querySelector('.slides');
+        const computed = scaler ? window.getComputedStyle(scaler).transform : 'none';
+        const scale = parseScale(computed);
+
+        // Find the SVG that was newly inserted after annotation.show()
+        function findInsertedSvg(attempts){
+          attempts = attempts || 0;
+          const svgs = Array.from(document.querySelectorAll('svg'));
+          const newSvgs = svgs.filter(s => !existingSvgs.has(s));
+          if(newSvgs.length > 0) return newSvgs[0];
+          if(attempts > 20) return null;
+          return null;
+        }
+
+        let attempts = 0;
+        function poll(){
+          attempts++;
+          const svg = findInsertedSvg(attempts);
+          if(svg){
+            const inv = `scale(${1/scale})`;
+            try{ svg.style.transform = inv; }catch(e){}
+            // Attach to annotation for future reference if lib expects it
+            try{ annotation.svg = svg; }catch(e){}
+            element['annotation'] = annotation;
+            console.log('Added annotation for', element, '->', svg);
+            return;
+          }
+          if(attempts > 20){
+            // Final fallback: use nearest overlapping SVG as before
+            try{
+              const rect = element.getBoundingClientRect();
+              const all = Array.from(document.querySelectorAll('svg'));
+              let best = null; let bestArea = 0;
+              all.forEach(s => {
+                const r = s.getBoundingClientRect();
+                const ix = Math.max(0, Math.min(rect.right, r.right) - Math.max(rect.left, r.left));
+                const iy = Math.max(0, Math.min(rect.bottom, r.bottom) - Math.max(rect.top, r.top));
+                const area = ix * iy;
+                if(area > bestArea){ bestArea = area; best = s; }
+              });
+              if(best && best.style){ best.style.transform = `scale(${1/scale})`; annotation.svg = best; }
+            }catch(e){}
+            element['annotation'] = annotation;
+            console.log('Added annotation (fallback) for', element);
+            return;
+          }
+          requestAnimationFrame(poll);
+        }
+
+        requestAnimationFrame(poll);
+      }
+
+      Reveal.on('fragmentshown', (event) => {
+        const fragment = event.fragment;
+        if('annotation' in fragment) fragment.annotation.show();
+        else if(fragment.classList.contains('mark-underline')) addAnnotation(fragment, 'underline', 'red');
+        else if(fragment.classList.contains('mark-box')) addAnnotation(fragment, 'box', 'red');
+        else if(fragment.classList.contains('mark-circle')) addAnnotation(fragment, 'circle', 'red');
+        else if(fragment.classList.contains('mark-highlight')) addAnnotation(fragment, 'highlight', 'goldenRod');
+      });
+
+      Reveal.on('fragmenthidden', (event) => {
+        const fragment = event.fragment;
+        if('annotation' in fragment) fragment.annotation.hide();
+      });

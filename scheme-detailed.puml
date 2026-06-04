@@ -1,0 +1,51 @@
+@startuml scheme-detailed
+!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
+skinparam{
+  DefaultFontColor #white
+  NoteBackgroundColor #9c8458ff
+  backgroundColor transparent
+}
+
+[Cluster agent] as cls #DarkGreen
+[Site agent] as site #DarkBlue
+[Material agent] as mat #DarkGoldenRod
+[Contractor agent] as con #DarkOrange
+
+note top of cls
+  Plan months for clusters
+  1. Site plan should be satisfied
+end note
+
+note top of site
+  Plan dates for site service
+  1. Site plan should be satisfied
+end note
+
+note bottom of mat
+  Decide transportation
+  1. Amount of moved materials in a period is limited
+  2. Supplies should not be too often
+end note
+
+note bottom of con
+  Assign subcontractors to sites
+  1. Contractors are available during specified period
+  2. A site must be served by the same contractor start to end
+end note
+
+note "1. Sites must be started within a month of the cluster\n2. 90% of cluster sites should be done" as cs
+note "1. At the moment of starting a cluster\nThere should be enough materials for 90% sites" as cm
+note "1. At the moment of starting a cluster\nThere should be enough contractors for 90% of sites" as cc
+note "1. There should be enough materials at given/warehouse for site before execution" as sm
+note "1. There should be enough contractors\nwith given region and skill for executing a site" as sc
+
+cls -- cs
+cs -- site
+cls -- cm
+cm -- mat
+cc -- con
+site -- sm
+sm -- mat
+sc -- con
+
+@enduml

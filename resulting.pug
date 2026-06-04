@@ -1,0 +1,395 @@
+extends presentation_base.pug
+
+block title
+	title Abstract hierarchical scheme for a delivery system problem
+
+block slides
+	section
+		h1 Abstract hierarchical scheme for a delivery system problem
+	section
+		section(data-auto-animate)
+			h1 Background
+			img(src="clusters1.svg", style="margin-left:auto;margin-right:auto")
+			.container
+				.col
+					h4 Cluster division
+					p Divide sites into clusters considering geometrical properties
+				.col-div
+					h4 Cluster scheduling
+					p Assign an execution month for each cluster
+				.col-div
+					h4 Site scheduling
+					p Set execution date for each site
+				.col-div
+					h4 Material planning
+					p Plan material transportation
+				.col-div
+					h4 Contractor assignment
+					p Assign a worker to each site
+		section(data-auto-animate)
+			h1 Constraints
+			.container(style="font-size: 0.8em")
+				.col
+					h4 Cluster division
+					p Divide sites into clusters
+					ol
+						li Different clusters do not overlap in the spatial dimension
+						li The cluster size is balanced as much as possible.
+						li There are upper and lower requirements on the cluster size
+				.col-div
+					h4 Cluster scheduling
+					p Assign an execution month for each cluster
+					ol
+						li(class="fragment custom mark-box") Before the execution of each cluster starts, at least 80% of the 4G activities in the cluster meet the execution conditions (with sufficient resources)
+						li(class="fragment custom mark-box") Cluster activation requires a site percentage of &gt;80% to be operational
+						li The planned completion volume of the cluster meets the requirements of the master plan
+				.col-div
+					h4 Site scheduling
+					p Set execution date for each site
+					ol
+						li(class="fragment custom mark-box") Site must be planned in the same month as the corresponding cluster
+						li(class="fragment custom mark-box") Must plan site at date with enough material and subcontractor resources
+				.col-div
+					h4 Material planning
+					p Plan material transportation
+					ol
+						li Restock volume must not exceed the maximum replenishment volume limit.
+						li Restock schedules must meet a maximum of one Restock per period (e.g., once a week)
+				.col-div
+					h4 Contractor assignment
+					p Assign a worker to each site
+					ol
+						li Each contractor has working time window
+						li The same contractor should perform works on the site from start to end
+		section(data-auto-animate,data-auto-animate-id="features")
+			h1 Structure
+			+puml()
+				include scheme-detailed.puml
+			ul
+				li.fragment Multiple agents with <span class="fragment custom mark-highlight">different</span> decision variables
+				li.fragment <span class="fragment custom mark-highlight">Tight</span> linking constraints between the agents
+				li.fragment Want the agents to be <span class="fragment custom mark-highlight">replaceable</span>
+	section
+		section(data-auto-animate,data-auto-animate-id="features")
+			h1 Approaches
+			ul
+				li Multiple agents with different decision variables
+				li Tight linking constraints between the agents
+				li Want the agents to be replaceable
+			p Every approach will be a tradeoff between efficiency and generality
+			ol(data-fragment-index="1").fragment
+				li Hierarchical scheme
+					ol
+						li(data-fragment-index="2").fragment.semi-fade-out Consecutive scheme (all agents execute one after another)
+						li
+							span(data-fragment-index="2").fragment.highlight-blue Iterative scheme (agents call each other as subprocedure)
+							ul
+								li(data-fragment-index="2").fragment.semi-fade-out Surrogate model approximation
+						li(data-fragment-index="2").fragment.semi-fade-out Tree-structured search
+				li(data-fragment-index="2").fragment.semi-fade-out Relaxed scheme (all agents share common state, all inter-agent constraints are relaxed with penalties)
+					ol
+						li One-step penalized scheme
+						li Lagrangian decomposition
+	section
+		section(data-auto-animate)
+			h1 Hierarchical scheme
+			.left
+				pre
+					code.language-plantuml.
+						@startuml
+						!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
+						skinparam{
+							DefaultFontColor #white
+							NoteBackgroundColor #9c8458ff
+							backgroundColor transparent
+						}
+						[Cluster division]-->[Cluster scheduling]
+						[Cluster scheduling]--->[Site scheduling]
+						[Site scheduling]-->[Material replenishment]
+						[Site scheduling]-->[Contractor assignment]
+						@enduml
+			.right
+				ul
+					li For each agent, solutions of the upper-level agents are fixed. It tries to satisfy it or calculate objective function
+		section(data-auto-animate)
+			h1 Hierarchical scheme
+			.left
+				pre
+					code.language-plantuml.
+						@startuml
+						!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
+						skinparam{
+							DefaultFontColor #white
+							NoteBackgroundColor #9c8458ff
+							backgroundColor transparent
+						}
+						[Cluster division] as cdiv
+						[Cluster scheduling] as cs
+						[Site scheduling] as ss
+						[Material replenishment] as mat
+						[Contractor assignment] as con
+						cdiv-->cs: clusters
+						cdiv<--cs: objective function
+						cs--->ss: cluster schedule
+						cs<---ss: nuber of assigned sites
+						ss-->mat: site schedule
+						ss<--mat: feasibility
+						ss-->con: site schedule
+						ss<--con: feasibility
+						@enduml
+			.right
+				ul
+					li For each agent, solutions of the upper-level agents are fixed. It tries to satisfy it or calculate objective function
+					li The agent is a iterative optimization algorithm
+					li The agent call a lower-level agent as a subprocedure if it wants to check its solution
+	section
+		include hexagonal.pug
+	section
+		section
+			h1 Overall structure
+			.r-stretch
+				+puml.
+					@startuml
+					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
+					skinparam{
+						DefaultFontColor #white
+						NoteBackgroundColor #9c8458ff
+						backgroundColor transparent
+					}
+					component "Site agent" {
+						portin "Plan sites" as planSites
+						portout "Task earliest date" as taskDate
+						[Site LNS]
+						planSites-->[Site LNS]: sites
+						planSites<--[Site LNS]: solution
+						[Site LNS]-->taskDate
+					}
+
+					[Material adaptor] as mad
+					taskDate <|.. mad:Feasibility
+					component "Material agent" {
+						portin "Feasibility check" as maFeas
+					}
+					mad --> maFeas:Material requirement
+					mad <-- maFeas:Feasibility
+
+					[Contractor adaptor] as cad
+					taskDate <|.. cad:Feasibility
+					component "Contractor agent" {
+						portin "Feasibility check" as coFeas
+					}
+					cad --> coFeas:Material requirement
+					cad <-- coFeas:Feasibility
+
+					component "Cluster agent"{
+						portin "Build schedule" as buildClusterSchedule
+						portout "Assign cluster" as assign
+						portout "Check requirements" as check
+						[Cluster LNS]
+						buildClusterSchedule --> [Cluster LNS]: clusters
+						buildClusterSchedule <-- [Cluster LNS]: unscheduled sites
+						[Cluster LNS] --> assign
+						[Cluster LNS] --> check
+					}
+
+					[Site adaptor] as clusterSite
+					' assign ..|> clusterSite
+					clusterSite .|> assign: templates
+					clusterSite -> planSites
+
+					[Cluster-material adaptor] as clusterMat
+					check <|.. clusterMat
+					clusterMat --> maFeas
+					clusterMat <-- maFeas
+
+					[Cluster-contractor adaptor] as clusterCon
+					check <|.. clusterCon
+					clusterCon --> coFeas
+					clusterCon <-- coFeas
+
+					component "Cluster division" {
+						portout "Check solution" as divCheck
+						[Division algorithm] --> divCheck
+					}
+
+					[Cluster adaptor] as clusterAd
+					divCheck <|. clusterAd: coefficients
+					clusterAd --> buildClusterSchedule
+					@enduml
+		section
+			h1 Communication scheme
+			.r-stretch
+				+puml.
+					@startuml
+					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
+					skinparam{
+						DefaultFontColor #white
+						NoteBackgroundColor #9c8458ff
+						backgroundColor transparent
+					}
+					participant "Cluster agent" as cls #DarkGreen
+					participant "Cluster-site adaptor" as csa
+					participant "Site agent" as st #DarkBlue
+					participant "Cluster-resource adaptor" as cra
+					participant "Site-resource adaptor" as sra
+					participant "Resource agent" as res #DarkGoldenRod
+
+					note over cls:Pick cluster to assign
+					cls -> cra:Request earliest cluster date
+					cra -> res:Request resource availability
+					note over res:Find closest feasible solution
+					res -> cra:Resource availability
+					cra -> cls:Earliest date
+					cls -> csa:Schedule cluster
+					csa -> st:Site schedule request
+					note over st:Run LNS
+					st->sra:Request earliest site date
+					sra->res:Request resource availability
+					note over res:Find closest feasible solution
+					res->sra:Resource availability
+					sra->st:Earliest date
+					note over st:Schedule site
+					st->sra:Apply site schedule
+					sra->res:Apply state update
+					note over res:Update state
+					st->csa:Solution
+					csa->cls:Cluster template
+					note over cls:Apply cluster assignment
+					cls->cra:Apply cluster schedule
+					cra->res:Apply state update
+					note over res:Update state
+					...
+					@enduml
+		section
+			h2 LNS
+			.left3
+				+puml().
+					@startuml lns1
+					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
+					skinparam{
+						DefaultFontColor #?black:white
+						NoteBackgroundColor #9c8458ff
+						backgroundColor transparent
+					}
+
+					start
+					:repair;
+					while (stop criterion is met?) is (yes)
+						:destroy;
+						:repair;
+						if (new solution has more sites assigned) then
+							:replace the current solution with the new;
+						endif
+					endwhile (no)
+					stop
+					@enduml
+				| Destroy: remove k random sites (clusters)
+			.left3
+				| Site repair
+				+puml().
+					@startuml repair-site
+					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
+					skinparam{
+						DefaultFontColor #?black:white
+						NoteBackgroundColor #9c8458ff
+						backgroundColor transparent
+					}
+					while (for each site)
+						:time = monthStart;
+						while (for each constraint)
+							:time = earliestTime(time,monthEnd);
+						endwhile
+						if (time is within the current month) then (yes)
+							:assign site;
+							while (for each constraint)
+								:assignSite(site,time);
+							endwhile
+						endif
+					endwhile
+					stop
+					@enduml
+			.left3
+				| Cluster repair
+				+puml().
+					@startuml repair-cluster
+					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
+					skinparam{
+						DefaultFontColor #?black:white
+						NoteBackgroundColor #9c8458ff
+						backgroundColor transparent
+					}
+					while (for each cluster)
+						while (for each month in random order)
+							while (for each constraint)
+								:checkFeasibility(cluster,month);
+							endwhile
+							if (can assign) then (yes)
+								:schedule = siteAgent.assingCluster(month);
+								if (got feasible scheule) then (yes)
+									while (for each constraint)
+										:assignSites(schedule);
+									endwhile
+									break
+								endif
+							endif
+						endwhile
+					endwhile
+					stop
+					@enduml
+	section
+		section(data-markdown)
+			textarea(data-template).
+				# Results
+
+				|Instance|total clusters|total sites|clusters|tasks|time|
+				|---|---|---|---|---|---|
+				|ioh-test|315|4660|240|3901|2s|
+				|ioh-test-filt|274|4085|233|3986|1s|
+				|ioh-test-full|399|9923|167|4021|5s|
+				|ioh-test-full-filt|391|6311|299|4425|3s|
+				|target0723|1288|27620|350|6265|4min|
+				|target0723-filt|1288|27620|343|6256|4min|
+				|target0723-round|1288|27620|327|6094|10min|
+				|target0723-round-filt|1288|27620|320|6092|9min|
+				|target0723-round-unify|1288|27620|352|6332|41s|
+				|xl-test-closest-filt|1289|36239|1220|29782|4s|
+	section
+		section
+			h1 Problems
+			ul
+				li.fragment At <span class="fragment custom mark-underline">each</span> iteration of an agent it calls lower level agents. <span class="fragment">If there are \(k\) agents, each performing \(n\) iterations then the time complexity is <span class="fragment custom mark-circle">\(n^k\)</span></span>
+				li.fragment There might not exist a feasible solution in some scenarios
+				li.fragment Possibly agent may not form a hierarchial scheme
+		section
+			h1 Agent approximation
+			.r-stretch
+				+puml.
+					@startuml scheme8
+					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
+					skinparam{
+						DefaultFontColor #white
+						NoteBackgroundColor #9c8458ff
+						backgroundColor transparent
+					}
+
+					participant "Site agent" as site #DarkBlue
+					participant "Relaxed resource agent" as rmat #DarkGoldenRod
+					participant "Penalized resource agent" as pmat #DarkGoldenRod
+					participant "Resource agent" as mat #DarkGoldenRod
+
+					site->rmat:Resource check request
+					site<-rmat:Resource availability
+					...
+					!foreach $j in [1,2]
+						site->mat:Solution
+						mat->pmat:Closest feasible
+						pmat->site:Penalized objective
+						!foreach $i in [1,2]
+							site->pmat:Solution
+							pmat->site:Penalized objective
+						!endfor
+						...
+					!endfor
+					@enduml
+	section
+		h1 Abstract hierarchical scheme for a delivery system problem
