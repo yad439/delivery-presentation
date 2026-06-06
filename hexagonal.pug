@@ -8,7 +8,11 @@ section
 			li.fragment Adapters implement ports, translating external data for core logic
 		aside.footnotes(style="font-size: 0.8em;").
 			[1] <a href="https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)">https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)</a>
-	img(src="hexagonal.svg")
+	.right
+		if embed
+			include hexagonal.svg
+		else
+			img(src="hexagonal.svg", style="margin-left:auto;margin-right:auto")
 section
 	h2 Task constraint
 	pre

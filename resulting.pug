@@ -9,7 +9,10 @@ block slides
 	section
 		section(data-auto-animate)
 			h1 Background
-			img(src="clusters.svg", style="margin-left:auto;margin-right:auto")
+			if embed
+				include clusters.svg
+			else
+				img(src="clusters.svg", style="margin-left:auto;margin-right:auto")
 			.container
 				.col
 					h4 Cluster division

@@ -1,3 +1,6 @@
+- var reveal = 'node_modules/reveal.js/dist'
+- var embed = true
+
 mixin puml()
   pre
     code.language-plantuml
@@ -8,7 +11,6 @@ mixin markdown()
     textarea(data-template)
       block
 
-- var reveal = 'node_modules/reveal.js/dist'
 
 doctype html
 html(lang="en")
@@ -17,27 +19,49 @@ html(lang="en")
     meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no")
     block title
       title Default Presentation Title
-    link(rel="stylesheet" href=`${reveal}/reset.css`)
-    link(rel="stylesheet" href=`${reveal}/reveal.css`)
-    link(rel="stylesheet" href=`${reveal}/theme/black.css`)
-    link(rel="stylesheet" href="custom.css")
-    link(rel="stylesheet" href="node_modules/highlight.js/styles/stackoverflow-dark.min.css")
+    if embed
+      style
+        include node_modules/reveal.js/dist/reset.css
+        include node_modules/reveal.js/dist/reveal.css
+        include node_modules/reveal.js/dist/theme/black.css
+        include:clean-css custom.css
+        include node_modules/highlight.js/styles/stackoverflow-dark.min.css
+    else
+      link(rel="stylesheet" href=`${reveal}/reset.css`)
+      link(rel="stylesheet" href=`${reveal}/reveal.css`)
+      link(rel="stylesheet" href=`${reveal}/theme/black.css`)
+      link(rel="stylesheet" href="custom.css")
+      link(rel="stylesheet" href="node_modules/highlight.js/styles/stackoverflow-dark.min.css")
     block additional_styles
   body
     .reveal
       .slides
         block slides
 
-    script(src=`${reveal}/reveal.js`)
-    script(src=`${reveal}/plugin/notes.js`)
-    script(src=`${reveal}/plugin/markdown.js`)
-    script(src=`${reveal}/plugin/highlight.js`)
-    script(src=`${reveal}/plugin/math.js`)
-    script(src=`${reveal}/plugin/zoom.js`)
+    if embed
+      script
+        include node_modules/reveal.js/dist/reveal.js
+        include node_modules/reveal.js/dist/plugin/notes.js
+        include node_modules/reveal.js/dist/plugin/markdown.js
+        include node_modules/reveal.js/dist/plugin/highlight.js
+        include node_modules/reveal.js/dist/plugin/math.js
+        include node_modules/reveal.js/dist/plugin/zoom.js
+    else
+      script(src=`${reveal}/reveal.js`)
+      script(src=`${reveal}/plugin/notes.js`)
+      script(src=`${reveal}/plugin/markdown.js`)
+      script(src=`${reveal}/plugin/highlight.js`)
+      script(src=`${reveal}/plugin/math.js`)
+      script(src=`${reveal}/plugin/zoom.js`)
     block additional_scripts
       //- script(src="https://unpkg.com/tldreveal/dist/bundle/index.js")
-      script(src="https://unpkg.com/tldreveal/dist/bundle/index.js")
-      script(src="https://unpkg.com/rough-notation/lib/rough-notation.iife.js")
+      //- script(src="https://unpkg.com/tldreveal/dist/bundle/index.js")
+      if embed
+        script
+          :fetch
+            https://unpkg.com/rough-notation/lib/rough-notation.iife.js
+      else
+        script(src="https://unpkg.com/rough-notation/lib/rough-notation.iife.js")
     //-   script(src="https://cdn.jsdelivr.net/npm/reveal.js-mermaid-plugin@11.4.1/plugin/mermaid/mermaid.js")
 
     script.
@@ -51,7 +75,7 @@ html(lang="en")
         pdfSeparateFragments: true,
         // barColor: 'rgb(100, 180, 255)'
         scrollActivationWidth: undefined,
-        plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX, RevealZoom, Tldreveal.Tldreveal()],
+        plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX, RevealZoom],
         // RevealMermaid
         // dependencies: [{src: 'https://cdn.jsdelivr.net/npm/reveal-plantuml',}],
         // plantuml: {serverPath: 'https://plantuml.com/plantuml/svg/'}
