@@ -9,6 +9,7 @@ jobs:
         with:
           version: latest
           cache: true
+          cache_dependency_path: package.json
       - run: pnpm build
       - uses: actions/upload-artifact@v7
         with:
