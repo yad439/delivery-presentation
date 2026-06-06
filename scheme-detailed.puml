@@ -5,6 +5,7 @@ skinparam{
   NoteBackgroundColor #9c8458ff
   backgroundColor transparent
 }
+scale 0.8
 
 [Cluster agent] as cls #DarkGreen
 [Site agent] as site #DarkBlue
@@ -39,13 +40,15 @@ note "1. At the moment of starting a cluster\nThere should be enough contractors
 note "1. There should be enough materials at given/warehouse for site before execution" as sm
 note "1. There should be enough contractors\nwith given region and skill for executing a site" as sc
 
-cls -- cs
-cs -- site
+cls - cs
+cs - site
 cls -- cm
 cm -- mat
+cls -- cc
 cc -- con
 site -- sm
 sm -- mat
+site-sc
 sc -- con
 
 @enduml

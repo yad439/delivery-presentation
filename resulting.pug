@@ -9,7 +9,7 @@ block slides
 	section
 		section(data-auto-animate)
 			h1 Background
-			img(src="clusters1.svg", style="margin-left:auto;margin-right:auto")
+			img(src="clusters.svg", style="margin-left:auto;margin-right:auto")
 			.container
 				.col
 					h4 Cluster division
@@ -63,8 +63,7 @@ block slides
 						li The same contractor should perform works on the site from start to end
 		section(data-auto-animate,data-auto-animate-id="features")
 			h1 Structure
-			+puml()
-				include scheme-detailed.puml
+			include:plantuml scheme-detailed.puml
 			ul
 				li.fragment Multiple agents with <span class="fragment custom mark-highlight">different</span> decision variables
 				li.fragment <span class="fragment custom mark-highlight">Tight</span> linking constraints between the agents
@@ -94,49 +93,47 @@ block slides
 		section(data-auto-animate)
 			h1 Hierarchical scheme
 			.left
-				pre
-					code.language-plantuml.
-						@startuml
-						!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
-						skinparam{
-							DefaultFontColor #white
-							NoteBackgroundColor #9c8458ff
-							backgroundColor transparent
-						}
-						[Cluster division]-->[Cluster scheduling]
-						[Cluster scheduling]--->[Site scheduling]
-						[Site scheduling]-->[Material replenishment]
-						[Site scheduling]-->[Contractor assignment]
-						@enduml
+				:plantuml
+					@startuml
+					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
+					skinparam{
+						DefaultFontColor #white
+						NoteBackgroundColor #9c8458ff
+						backgroundColor transparent
+					}
+					[Cluster division]-->[Cluster scheduling]
+					[Cluster scheduling]--->[Site scheduling]
+					[Site scheduling]-->[Material replenishment]
+					[Site scheduling]-->[Contractor assignment]
+					@enduml
 			.right
 				ul
 					li For each agent, solutions of the upper-level agents are fixed. It tries to satisfy it or calculate objective function
 		section(data-auto-animate)
 			h1 Hierarchical scheme
 			.left
-				pre
-					code.language-plantuml.
-						@startuml
-						!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
-						skinparam{
-							DefaultFontColor #white
-							NoteBackgroundColor #9c8458ff
-							backgroundColor transparent
-						}
-						[Cluster division] as cdiv
-						[Cluster scheduling] as cs
-						[Site scheduling] as ss
-						[Material replenishment] as mat
-						[Contractor assignment] as con
-						cdiv-->cs: clusters
-						cdiv<--cs: objective function
-						cs--->ss: cluster schedule
-						cs<---ss: nuber of assigned sites
-						ss-->mat: site schedule
-						ss<--mat: feasibility
-						ss-->con: site schedule
-						ss<--con: feasibility
-						@enduml
+				:plantuml
+					@startuml
+					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
+					skinparam{
+						DefaultFontColor #white
+						NoteBackgroundColor #9c8458ff
+						backgroundColor transparent
+					}
+					[Cluster division] as cdiv
+					[Cluster scheduling] as cs
+					[Site scheduling] as ss
+					[Material replenishment] as mat
+					[Contractor assignment] as con
+					cdiv-->cs: clusters
+					cdiv<--cs: objective function
+					cs--->ss: cluster schedule
+					cs<---ss: nuber of assigned sites
+					ss-->mat: site schedule
+					ss<--mat: feasibility
+					ss-->con: site schedule
+					ss<--con: feasibility
+					@enduml
 			.right
 				ul
 					li For each agent, solutions of the upper-level agents are fixed. It tries to satisfy it or calculate objective function
@@ -148,7 +145,7 @@ block slides
 		section
 			h1 Overall structure
 			.r-stretch
-				+puml.
+				:plantuml
 					@startuml
 					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
 					skinparam{
@@ -219,7 +216,7 @@ block slides
 		section
 			h1 Communication scheme
 			.r-stretch
-				+puml.
+				:plantuml
 					@startuml
 					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
 					skinparam{
@@ -263,7 +260,7 @@ block slides
 		section
 			h2 LNS
 			.left3
-				+puml().
+				:plantuml
 					@startuml lns1
 					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
 					skinparam{
@@ -286,7 +283,7 @@ block slides
 				| Destroy: remove k random sites (clusters)
 			.left3
 				| Site repair
-				+puml().
+				:plantuml
 					@startuml repair-site
 					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
 					skinparam{
@@ -310,7 +307,7 @@ block slides
 					@enduml
 			.left3
 				| Cluster repair
-				+puml().
+				:plantuml
 					@startuml repair-cluster
 					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
 					skinparam{
@@ -363,7 +360,7 @@ block slides
 		section
 			h1 Agent approximation
 			.r-stretch
-				+puml.
+				:plantuml
 					@startuml scheme8
 					!include https://raw.githubusercontent.com/patrik-csak/one-dark-plantuml-theme/v1.0.1/theme.puml
 					skinparam{
