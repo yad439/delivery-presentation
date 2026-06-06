@@ -1,0 +1,12 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+	"image": "mcr.microsoft.com/devcontainers/javascript-node:4-24-trixie",
+	"postCreateCommand": "pnpm i",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.live-server"
+			]
+		}
+	},
+}
