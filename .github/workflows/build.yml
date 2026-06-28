@@ -11,7 +11,15 @@ jobs:
           cache: true
           cache_dependency_path: package.json
       - run: pnpm build
+      - run: pnpm exec puppeteer browsers install chrome
+      - run: pnpm exec decktape reveal resulting.html resulting.pdf
       - uses: actions/upload-artifact@v7
         with:
-          name: presentation
+          name: presentation.html
+          archive: false
           path: resulting.html
+      - uses: actions/upload-artifact@v7
+        with:
+          name: presentation.pdf
+          archive: false
+          path: resulting.pdf

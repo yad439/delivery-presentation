@@ -12,5 +12,9 @@
 	"type": "module",
 	"scripts": {
 		"build": "node build.js"
+	},
+	"devDependencies": {
+		"decktape": "^3.16.1",
+		"puppeteer": "^25.2.1"
 	}
 }
