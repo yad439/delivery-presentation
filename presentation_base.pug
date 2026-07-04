@@ -165,6 +165,7 @@ html(lang="en")
 					const fragment = event.fragment;
 					if('annotation' in fragment) fragment.annotation.hide();
 				});
-		script
-			:fetch
-				https://github.com/tkrkt/reveal.js-elapsed-time-bar/raw/refs/heads/master/plugin/elapsed-time-bar/elapsed-time-bar.js
+		if timer
+			script
+				:fetch
+					https://github.com/tkrkt/reveal.js-elapsed-time-bar/raw/refs/heads/master/plugin/elapsed-time-bar/elapsed-time-bar.js

@@ -24,5 +24,7 @@ function plantumlFilter(content, options) {
 	return `<img src="https://plantuml.com/plantuml/svg/${compressedContent}"/>`;
 }
 
+const noTimer = process.argv.includes('--nt');
+
 const result = compileFile('resulting.pug', { filters: { 'plantuml': plantumlFetchFilter, 'fetch': fetchFilter } });
-fs.writeFileSync('resulting.html', result());
+fs.writeFileSync('resulting.html', result({ timer: !noTimer }));
