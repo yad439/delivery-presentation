@@ -10,7 +10,7 @@ jobs:
           version: latest
           cache: true
           cache_dependency_path: package.json
-      - run: pnpm build -- --np
+      - run: pnpm build -- --nt
       - run: pnpm exec puppeteer browsers install chrome
       - run: pnpm exec decktape --chrome-arg=--no-sandbox generic --key=Space resulting.html resulting.pdf
       - uses: actions/upload-artifact@v7
