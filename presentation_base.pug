@@ -124,7 +124,6 @@ html(lang="en")
 							// Attach to annotation for future reference if lib expects it
 							try{ annotation.svg = svg; }catch(e){}
 							element['annotation'] = annotation;
-							console.log('Added annotation for', element, '->', svg);
 							return;
 						}
 						if(attempts > 20){
@@ -143,7 +142,6 @@ html(lang="en")
 								if(best && best.style){ best.style.transform = `scale(${1/scale})`; annotation.svg = best; }
 							}catch(e){}
 							element['annotation'] = annotation;
-							console.log('Added annotation (fallback) for', element);
 							return;
 						}
 						requestAnimationFrame(poll);
