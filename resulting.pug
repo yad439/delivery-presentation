@@ -1,11 +1,11 @@
 extends presentation_base.pug
 
 block title
-	title Abstract hierarchical scheme for a delivery scheduling problem
+	title Abstract hierarchical scheme for a delivery scheduling
 
 block slides
 	section
-		h1 Abstract multi-agent approach for a delivery scheduling problem
+		h1 Abstract multi-agent approach for a service delivery scheduling problem
 	section
 		section(data-auto-animate)
 			h1 Background
@@ -68,16 +68,16 @@ block slides
 			h1 Structure
 			include:plantuml scheme-detailed.puml
 			ul
-				li.fragment Multiple agents with <span class="fragment custom mark-highlight">different</span> decision variables
-				li.fragment <span class="fragment custom mark-highlight">Tight</span> linking constraints between the agents
-				li.fragment Want the agents to be <span class="fragment custom mark-highlight">replaceable</span>
+				li.fragment Multiple subproblems with <span class="fragment custom mark-highlight">different types of</span> decision variables
+				li.fragment <span class="fragment custom mark-highlight">Tight</span> linking constraints between the subproblems
+				li.fragment We want the agents to be <span class="fragment custom mark-highlight">replaceable</span>
 	section
 		section(data-auto-animate,data-auto-animate-id="features")
 			h1 Approaches
 			ul
-				li Multiple agents with different decision variables
-				li Tight linking constraints between the agents
-				li Want the agents to be replaceable
+				li Multiple subproblems with different types of decision variables
+				li Tight linking constraints between the subproblems
+				li We want the agents to be replaceable
 			p Every approach will be a tradeoff between efficiency and generality
 			ol(data-fragment-index="1").fragment
 				li Hierarchical scheme
@@ -91,7 +91,7 @@ block slides
 				li(data-fragment-index="2").fragment.semi-fade-out Relaxed scheme (all agents share common state, all inter-agent constraints are relaxed with penalties)
 					ol
 						li One-step penalized scheme
-						li Lagrangian decomposition
+						li Lagrangian decomposition, ADMM
 	section
 		section(data-auto-animate)
 			h1 Hierarchical scheme
@@ -361,7 +361,7 @@ block slides
 			ul
 				li.fragment At <span class="fragment custom mark-underline">each</span> iteration of an agent it calls lower level agents. <span class="fragment">If there are \(k\) agents, each performing \(n\) iterations then the time complexity is <span class="fragment custom mark-circle">\(n^k\)</span></span>
 				li.fragment There might not exist a feasible solution in some scenarios
-				li.fragment Possibly agent may not form a hierarchial scheme
+				li.fragment Possibly subprblems may not form a hierarchial scheme
 		section
 			h1 Agent approximation
 			.r-stretch
@@ -394,4 +394,4 @@ block slides
 					!endfor
 					@enduml
 	section
-		h1 Abstract multi-agent approach for a delivery scheduling problem
+		h1 Abstract multi-agent approach for a service delivery scheduling problem
